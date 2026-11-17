@@ -19,6 +19,9 @@ if (!profiles) {
 const required = [
   'Claude: Nemotron Ultra',
   'OpenCode',
+  'OpenCode: DeepSeek V4.1',
+  'OpenCode: GLM-5.3 Flash',
+  'OpenCode: MiMo-V2.6 Flash',
   'Claude: Nemotron Lightning',
   'Claude: Nemotron Super-VL'
 ];
@@ -36,5 +39,5 @@ if (!profiles['OpenCode'].args.some(a => a.includes('opencode'))) {
   process.exit(1);
 }
 
-console.log('PASS: All 4 terminal profiles verified in Antigravity settings');
+console.log('PASS: All terminal profiles verified in Antigravity settings');
 process.exit(0);
