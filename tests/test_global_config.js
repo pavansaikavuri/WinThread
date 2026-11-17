@@ -18,20 +18,20 @@ if (!config.panes || config.panes.length !== 4) {
 }
 
 const expectedOrder = [
-  { id: 'pane-ultra', pos: 'top-left', title: 'Claude: Nemotron Ultra' },
-  { id: 'pane-opencode', pos: 'top-right', title: 'OpenCode' },
-  { id: 'pane-lightning', pos: 'bottom-left', title: 'Claude: Nemotron Lightning' },
-  { id: 'pane-super', pos: 'bottom-right', title: 'Claude: Nemotron Super-VL' }
+  { id: 'pane-ultra', pos: 'top-left', title: 'Claude: Nemotron Ultra', model: 'model/nemotron-3-ultra' },
+  { id: 'pane-opencode', pos: 'top-right', title: 'OpenCode: DeepSeek V4.1', model: 'opencode/deepseek-v4.1-flash-free' },
+  { id: 'pane-lightning', pos: 'bottom-left', title: 'Claude: Nemotron Lightning', model: 'model/nemotron-3.5-lightning' },
+  { id: 'pane-super', pos: 'bottom-right', title: 'Claude: Nemotron Super-VL', model: 'model/nemotron-3.5-super-vl' }
 ];
 
 for (let i = 0; i < 4; i++) {
   const p = config.panes[i];
   const exp = expectedOrder[i];
-  if (p.id !== exp.id || p.position !== exp.pos || p.title !== exp.title) {
-    console.error(`FAIL: Pane ${i} mismatch. Found: ${JSON.stringify(p)} vs Expected: ${JSON.stringify(exp)}`);
+  if (p.id !== exp.id || p.position !== exp.pos || p.title !== exp.title || p.model !== exp.model) {
+    console.error(`FAIL: Pane ${i} mismatch.\nFound: ${JSON.stringify(p)}\nExpected: ${JSON.stringify(exp)}`);
     process.exit(1);
   }
 }
 
-console.log('PASS: Global 4-pane cockpit configuration verified');
+console.log('PASS: Global 4-pane cockpit configuration verified with DeepSeek V4.1');
 process.exit(0);

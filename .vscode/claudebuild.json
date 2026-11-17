@@ -15,10 +15,10 @@
     },
     {
       "id": "pane-opencode",
-      "title": "OpenCode",
-      "model": "interactive",
+      "title": "OpenCode: DeepSeek V4.1",
+      "model": "opencode/deepseek-v4.1-flash-free",
       "position": "top-right",
-      "profile": "OpenCode",
+      "profile": "OpenCode: DeepSeek V4.1",
       "command": "opencode",
       "color": "terminal.ansiGreen"
     },
