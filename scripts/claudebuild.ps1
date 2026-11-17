@@ -39,7 +39,7 @@ try {
 
 Clear-Host
 Write-Host "==========================================================================" -ForegroundColor Cyan
-Write-Host "               GLOBAL 4-PANE MULTI-AGENT BUILD COCKPIT                    " -ForegroundColor Cyan
+Write-Host "               GLOBAL 7-MODEL MULTI-AGENT BUILD COCKPIT                   " -ForegroundColor Cyan
 Write-Host "==========================================================================" -ForegroundColor Cyan
 Write-Host " Active Folder : $currentDir" -ForegroundColor White
 Write-Host " Config Source : $configSource" -ForegroundColor DarkGray
@@ -53,12 +53,24 @@ foreach ($pane in $config.panes) {
     $titleStr = $pane.title.PadRight(28)
     Write-Host " $posStr $titleStr -> $($pane.model)" -ForegroundColor Green
 }
+Write-Host "--------------------------------------------------------------------------" -ForegroundColor DarkGray
+Write-Host " Alternative OpenCode Models: 'claudebuild glm', 'claudebuild mimo'" -ForegroundColor Gray
+Write-Host " OmniRoute Fallback Combos  : auto/coding, auto/reasoning, auto/free, auto/1m" -ForegroundColor Gray
 Write-Host "==========================================================================" -ForegroundColor Cyan
+
+# Helper to set OpenCode model
+function Set-OpenCodeModel([string]$modelId) {
+    $p = Join-Path $env:USERPROFILE ".config\opencode\opencode.json"
+    if (Test-Path $p) {
+        $cfg = Get-Content $p -Raw | ConvertFrom-Json
+        $cfg.model = $modelId
+        $cfg | ConvertTo-Json -Depth 10 | Set-Content $p -Encoding UTF8
+    }
+}
 
 # 4. Action based on argument
 switch ($Target.ToLower()) {
     "status" {
-        # Status printed above, exit cleanly
         exit 0
     }
     "ultra" {
@@ -66,7 +78,23 @@ switch ($Target.ToLower()) {
         & claude --model model/nemotron-3-ultra
     }
     "opencode" {
-        Write-Host "Starting OpenCode in $currentDir..." -ForegroundColor Cyan
+        Write-Host "Starting OpenCode (DeepSeek V4.1 Flash Free) in $currentDir..." -ForegroundColor Cyan
+        Set-OpenCodeModel "opencode/deepseek-v4.1-flash-free"
+        & opencode
+    }
+    "deepseek" {
+        Write-Host "Starting OpenCode (DeepSeek V4.1 Flash Free) in $currentDir..." -ForegroundColor Cyan
+        Set-OpenCodeModel "opencode/deepseek-v4.1-flash-free"
+        & opencode
+    }
+    "glm" {
+        Write-Host "Starting OpenCode (GLM-5.3-Flash Free) in $currentDir..." -ForegroundColor Cyan
+        Set-OpenCodeModel "opencode/glm-5.3-flash-free"
+        & opencode
+    }
+    "mimo" {
+        Write-Host "Starting OpenCode (MiMo-V2.6-Flash Free) in $currentDir..." -ForegroundColor Cyan
+        Set-OpenCodeModel "opencode/mimo-v2.6-flash-free"
         & opencode
     }
     "lightning" {
@@ -86,7 +114,7 @@ switch ($Target.ToLower()) {
             Start-Process -FilePath $idePath -ArgumentList "`"$currentDir`""
         }
         Write-Host "`nReady! Inside Antigravity IDE:" -ForegroundColor Green
-        Write-Host "  1. Press Ctrl+Alt+C to open or cycle through the 4 panes (Top-Left Ultra, Top-Right OpenCode, Bottom-Left Lightning, Bottom-Right Super-VL)."
+        Write-Host "  1. Press Ctrl+Alt+C to open or cycle through the 4 panes (Top-Left Ultra, Top-Right OpenCode/DeepSeek, Bottom-Left Lightning, Bottom-Right Super-VL)."
         Write-Host "  2. Press Ctrl+Alt+Shift+C to perform a clean reset of the 2x2 cockpit."
         Write-Host "  3. Or click '+' in Terminal dropdown to launch any agent independently."
     }
