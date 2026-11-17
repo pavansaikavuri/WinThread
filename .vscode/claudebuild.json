@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ClaudeBuild Cockpit Configuration",
+  "description": "Defines the multi-Claude split terminal layout in Antigravity IDE",
+  "version": "1.0.0",
+  "panes": [
+    {
+      "id": "pane-ultra",
+      "title": "Claude: Nemotron Ultra",
+      "model": "model/nemotron-3-ultra",
+      "position": "left",
+      "command": "claude --model model/nemotron-3-ultra",
+      "icon": "robot"
+    },
+    {
+      "id": "pane-super",
+      "title": "Claude: Nemotron Super-VL",
+      "model": "model/nemotron-3.5-super-vl",
+      "position": "top-right",
+      "command": "claude --model model/nemotron-3.5-super-vl",
+      "icon": "eye"
+    },
+    {
+      "id": "pane-lightning",
+      "title": "Claude: Nemotron Lightning",
+      "model": "model/nemotron-3.5-lightning",
+      "position": "bottom-right",
+      "command": "claude --model model/nemotron-3.5-lightning",
+      "icon": "zap"
+    }
+  ]
+}
