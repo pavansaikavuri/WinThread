@@ -1,0 +1,50 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /c/Users/kavur/winthread && npm run lint"
+          },
+          {
+            "type": "command",
+            "command": "cd /c/Users/kavur/winthread && npx tsc --noEmit"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=\"${FILE_PATH}\"; if [[ \"$FILE\" == *.env* ]] || [[ \"$FILE\" == *package-lock.json ]]; then echo \"Blocked: $FILE\"; exit 1; fi"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm test:*)"
+    ],
+    "deny": [
+      "Read(.env*)",
+      "Read(**/.env*)",
+      "Read(*id_rsa*)",
+      "Read(*id_ed25519*)",
+      "Read(**/credentials.json)",
+      "Bash(git push*--force*)",
+      "Bash(git push*origin main*)",
+      "Bash(git push*origin master*)",
+      "Bash(rm -rf /*)",
+      "Bash(rmdir /s /q C:\\*)",
+      "Bash(rmdir /s /q C:\\\\*)"
+    ]
+  }
+}
