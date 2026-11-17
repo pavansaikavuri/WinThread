@@ -1,32 +1,44 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ClaudeBuild Cockpit Configuration",
-  "description": "Defines the multi-Claude split terminal layout in Antigravity IDE",
-  "version": "1.0.0",
+  "title": "Global Multi-Agent Cockpit Configuration",
+  "version": "2.0.0",
+  "layout": "2x2",
   "panes": [
     {
       "id": "pane-ultra",
       "title": "Claude: Nemotron Ultra",
       "model": "model/nemotron-3-ultra",
-      "position": "left",
+      "position": "top-left",
+      "profile": "Claude: Nemotron Ultra",
       "command": "claude --model model/nemotron-3-ultra",
-      "icon": "robot"
+      "color": "terminal.ansiBlue"
     },
     {
-      "id": "pane-super",
-      "title": "Claude: Nemotron Super-VL",
-      "model": "model/nemotron-3.5-super-vl",
+      "id": "pane-opencode",
+      "title": "OpenCode",
+      "model": "interactive",
       "position": "top-right",
-      "command": "claude --model model/nemotron-3.5-super-vl",
-      "icon": "eye"
+      "profile": "OpenCode",
+      "command": "opencode",
+      "color": "terminal.ansiGreen"
     },
     {
       "id": "pane-lightning",
       "title": "Claude: Nemotron Lightning",
       "model": "model/nemotron-3.5-lightning",
-      "position": "bottom-right",
+      "position": "bottom-left",
+      "profile": "Claude: Nemotron Lightning",
       "command": "claude --model model/nemotron-3.5-lightning",
-      "icon": "zap"
+      "color": "terminal.ansiCyan"
+    },
+    {
+      "id": "pane-super",
+      "title": "Claude: Nemotron Super-VL",
+      "model": "model/nemotron-3.5-super-vl",
+      "position": "bottom-right",
+      "profile": "Claude: Nemotron Super-VL",
+      "command": "claude --model model/nemotron-3.5-super-vl",
+      "color": "terminal.ansiMagenta"
     }
   ]
 }
