@@ -2,7 +2,7 @@
 $ErrorActionPreference = "Stop"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "    VERIFYING GLOBAL 7-MODEL MULTI-AGENT COCKPIT          " -ForegroundColor Cyan
+Write-Host "    VERIFYING GLOBAL 7-MODEL COCKPIT & ANTHROPIC HARNESS  " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 Write-Host "1. Testing OpenCode Default Model (DeepSeek V4.1 Flash)..." -ForegroundColor Yellow
@@ -17,8 +17,10 @@ Write-Host "`n3. Testing Antigravity Terminal Profiles..." -ForegroundColor Yell
 node tests/test_global_profiles.js
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
-Write-Host "`n4. Testing Idempotent Keybindings..." -ForegroundColor Yellow
+Write-Host "`n4. Testing Idempotent Keybindings & Exact Engine Commands..." -ForegroundColor Yellow
 node tests/test_idempotent_keybindings.js
+if ($LASTEXITCODE -ne 0) { exit 1 }
+node tests/verify_engine_commands.js
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
 Write-Host "`n5. Testing OpenCode CLI..." -ForegroundColor Yellow
@@ -39,7 +41,19 @@ Write-Host "`n7. Testing Global claudebuild CLI..." -ForegroundColor Yellow
 powershell -ExecutionPolicy Bypass -File tests/test_global_cli.ps1
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
+Write-Host "`n8. Testing Global Hard Deny Rules..." -ForegroundColor Yellow
+node tests/test_global_deny_rules.js
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
+Write-Host "`n9. Testing Global Exit Code 2 Self-Healing Hook..." -ForegroundColor Yellow
+powershell -ExecutionPolicy Bypass -File tests/test_exit_code_2.ps1
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
+Write-Host "`n10. Testing Global CLAUDE.md Hygiene & Routing Map..." -ForegroundColor Yellow
+node tests/test_claude_md_hygiene.js
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
 Write-Host "`n==========================================================" -ForegroundColor Green
-Write-Host "ALL 7 MULTI-AGENT VERIFICATION CHECKS PASSED!             " -ForegroundColor Green
+Write-Host "ALL 10 MULTI-AGENT & HARNESS VERIFICATION CHECKS PASSED!   " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green
 exit 0
