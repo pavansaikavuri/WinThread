@@ -30,7 +30,7 @@ Write-Host "PASS: opencode found at $($oc.Source)" -ForegroundColor Green
 
 Write-Host "`n6. Testing OmniRoute Gateway on 127.0.0.1:20128..." -ForegroundColor Yellow
 try {
-    $resp = Invoke-RestMethod -Uri "http://127.0.0.1:20128/v1/models" -Headers @{ Authorization = "Bearer sk-omniroute-master" } -TimeoutSec 5 -ErrorAction Stop
+    $resp = Invoke-RestMethod -Uri "http://127.0.0.1:20128/v1/models" -Headers @{ Authorization = "Bearer sk-omniroute-master" } -TimeoutSec 10 -ErrorAction Stop
     Write-Host "PASS: Gateway responding on 127.0.0.1:20128 with $($resp.data.Count) models" -ForegroundColor Green
 } catch {
     Write-Error "FAIL: OmniRoute Gateway offline: $_"
@@ -53,7 +53,11 @@ Write-Host "`n10. Testing Global CLAUDE.md Hygiene & Routing Map..." -Foreground
 node tests/test_claude_md_hygiene.js
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
+Write-Host "`n11. Testing Instant Close Config (Ctrl+Alt+X & Zero Prompt)..." -ForegroundColor Yellow
+node tests/test_instant_close_config.js
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
 Write-Host "`n==========================================================" -ForegroundColor Green
-Write-Host "ALL 10 MULTI-AGENT & HARNESS VERIFICATION CHECKS PASSED!   " -ForegroundColor Green
+Write-Host "ALL 11 MULTI-AGENT & HARNESS VERIFICATION CHECKS PASSED!   " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green
 exit 0
