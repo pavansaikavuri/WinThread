@@ -19,6 +19,6 @@ describe('/api/setup/extract route', () => {
     const res = await extractHandler(req);
     const data = await res.json();
     expect(data.success).toBe(false);
-    expect(data.error).toContain('private or local network');
+    expect(data.error).toContain('private');
   });
 });

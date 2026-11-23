@@ -9,9 +9,14 @@ export async function completeSetupWizard(data: SetupFormData, authUserId?: stri
     return { success: false, error: parsed.error.issues[0].message };
   }
 
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    return { success: false, error: 'Server configuration error: SUPABASE_SERVICE_ROLE_KEY is required' };
+  }
+
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    serviceRoleKey
   );
 
   return executeSetupTransaction(supabaseAdmin, parsed.data, authUserId || 'unauthenticated-lead');
@@ -26,13 +31,22 @@ export async function executeSetupTransaction(
 
   const { data: existingWs } = await supabase
     .from('workspaces')
-    .select('id')
+    .select('id, owner_id')
     .eq('domain', domain)
     .maybeSingle();
+
+  // Domain collision: if workspace exists and current user doesn't own it (or is unauthenticated), reject
+  if (existingWs) {
+    const isAuthenticated = userId !== 'unauthenticated-lead';
+    if (!isAuthenticated || existingWs.owner_id !== userId) {
+      return { success: false, error: `A workspace for ${domain} already exists. Please sign in to access your existing account.` };
+    }
+  }
 
   let workspaceId = existingWs?.id;
 
   if (!workspaceId) {
+    const isAuthenticated = userId !== 'unauthenticated-lead';
     const { data: workspace, error: wsError } = await supabase
       .from('workspaces')
       .insert({
@@ -41,7 +55,8 @@ export async function executeSetupTransaction(
         currency: 'USD',
         timezone: 'UTC',
         plan: 'beta',
-        status: 'active',
+        status: isAuthenticated ? 'active' : 'pending_claim',
+        owner_id: isAuthenticated ? userId : null,
       })
       .select('id')
       .single();

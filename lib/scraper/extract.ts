@@ -1,4 +1,5 @@
 import { ICP_PRESETS, ICPPreset } from '@/lib/constants/icp-presets';
+import { validateSafeUrl } from './ssrf';
 
 export interface TaxonomyData {
   workspaceName: string;
@@ -28,18 +29,10 @@ export async function extractAgencyTaxonomy(url: string): Promise<TaxonomyExtrac
   };
 
   try {
-    // 1. Validate URL & Prevent SSRF (Private IP / localhost blocking)
-    const parsedUrl = new URL(url);
-    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-      return { success: false, data: fallbackData, fallback: fallbackData, error: 'Only http and https protocols are supported' };
-    }
-    const hostname = parsedUrl.hostname.toLowerCase();
-    if (
-      ['localhost', '127.0.0.1', '0.0.0.0', '169.254.169.254', '::1'].includes(hostname) ||
-      hostname.endsWith('.local') ||
-      hostname.endsWith('.internal')
-    ) {
-      return { success: false, data: fallbackData, fallback: fallbackData, error: 'Access to private or local network hosts is prohibited' };
+    // 1. Validate URL & Prevent SSRF (DNS rebinding protection + comprehensive private IP blocking)
+    const validation = await validateSafeUrl(url);
+    if (!validation.safe) {
+      return { success: false, data: fallbackData, fallback: fallbackData, error: validation.error };
     }
 
     const controller = new AbortController();
