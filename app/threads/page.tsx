@@ -50,6 +50,15 @@ export default function ThreadsPage() {
     },
   ]);
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('quote') === '1' && threads.length > 0) {
+        setSelectedQuoteThread(threads[0]);
+      }
+    }
+  }, [threads]);
+
   const handleScan = async () => {
     setIsScanning(true);
     try {
