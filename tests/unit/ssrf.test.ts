@@ -159,4 +159,70 @@ describe('validateSafeUrl', () => {
     expect(result.safe).toBe(false);
     expect(result.error).toContain('Invalid');
   });
+
+  // Security Hardening: EGM-SYNTH-001 tests
+  it('rejects non-standard destination ports', async () => {
+    const r1 = await validateSafeUrl('http://google.com:6379');
+    expect(r1.safe).toBe(false);
+    expect(r1.error).toContain('port');
+
+    const r2 = await validateSafeUrl('https://google.com:22');
+    expect(r2.safe).toBe(false);
+    expect(r2.error).toContain('port');
+
+    const r3 = await validateSafeUrl('https://google.com:5432');
+    expect(r3.safe).toBe(false);
+    expect(r3.error).toContain('port');
+  });
+
+  it('allows standard destination ports 80 and 443', async () => {
+    const r1 = await validateSafeUrl('http://8.8.8.8:80');
+    expect(r1.safe).toBe(true);
+
+    const r2 = await validateSafeUrl('https://google.com:443');
+    expect(r2.safe).toBe(true);
+  });
+
+  it('rejects single-label internal hostnames', async () => {
+    const r1 = await validateSafeUrl('http://metadata/computeMetadata/v1/');
+    expect(r1.safe).toBe(false);
+    expect(r1.error).toContain('Single-label');
+
+    const r2 = await validateSafeUrl('http://redis:6379');
+    expect(r2.safe).toBe(false);
+  });
+
+  it('rejects scoped IPv6 addresses with zone indices', async () => {
+    const r1 = await validateSafeUrl('http://[fe80::1%eth0]/');
+    expect(r1.safe).toBe(false);
+    expect(r1.error).toContain('zone indices');
+
+    const r2 = await validateSafeUrl('http://[fe80::1%25eth0]/');
+    expect(r2.safe).toBe(false);
+    expect(r2.error).toContain('zone indices');
+  });
+
+  it('rejects .home.arpa and .arpa apex and subdomains', async () => {
+    const r1 = await validateSafeUrl('http://home.arpa/');
+    expect(r1.safe).toBe(false);
+    expect(r1.error).toContain('reserved TLDs');
+
+    const r2 = await validateSafeUrl('http://router.home.arpa/');
+    expect(r2.safe).toBe(false);
+    expect(r2.error).toContain('reserved TLDs');
+
+    const r3 = await validateSafeUrl('http://gateway.arpa/');
+    expect(r3.safe).toBe(false);
+    expect(r3.error).toContain('reserved TLDs');
+  });
+
+  it('normalizes trailing root dots in FQDNs and blocks them', async () => {
+    const r1 = await validateSafeUrl('http://localhost./');
+    expect(r1.safe).toBe(false);
+    expect(r1.error).toContain('local network');
+
+    const r2 = await validateSafeUrl('http://router.home.arpa./');
+    expect(r2.safe).toBe(false);
+    expect(r2.error).toContain('reserved TLDs');
+  });
 });

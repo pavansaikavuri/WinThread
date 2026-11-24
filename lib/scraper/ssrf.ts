@@ -85,14 +85,35 @@ function isPrivateIPv6(ip: string): boolean {
   return false;
 }
 
+const BLOCKED_HOSTNAMES = new Set(['localhost']);
+const BLOCKED_TLDS = [
+  '.local',
+  '.internal',
+  '.lan',
+  '.localhost',
+  '.home.arpa',
+  '.arpa',
+  '.corp',
+  '.home',
+];
+
 /**
  * Validate a URL is safe for outbound HTTP requests.
  * - Enforces http/https only
- * - Blocks localhost and reserved TLDs (.local, .internal, .lan, .localhost)
+ * - Enforces standard web ports (80, 443, or empty default)
+ * - Normalizes hostnames (strips trailing dots)
+ * - Strips IPv6 brackets and rejects scoped IPv6 addresses with zone indices (% or %25)
+ * - Blocks localhost and reserved TLDs (.local, .internal, .lan, .localhost, .home.arpa, .arpa, etc.)
+ * - Prohibits single-label internal hostnames (e.g. metadata, redis)
  * - Resolves hostnames and checks all resolved IPs against isPrivateIP to prevent DNS rebinding
  * - Validates literal IP addresses directly
  */
 export async function validateSafeUrl(rawUrl: string): Promise<{ safe: boolean; error?: string }> {
+  // Pre-check: Scoped IPv6 with zone indices (% or %25) are strictly prohibited
+  if (/\[[^\]]*(?:%|%25)[^\]]*\]/i.test(rawUrl)) {
+    return { safe: false, error: 'Scoped IPv6 addresses with zone indices are prohibited' };
+  }
+
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(rawUrl);
@@ -100,31 +121,58 @@ export async function validateSafeUrl(rawUrl: string): Promise<{ safe: boolean; 
     return { safe: false, error: 'Invalid URL format' };
   }
 
-  // Only allow http/https
+  // 1. Only allow http/https
   if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
     return { safe: false, error: 'Only http and https protocols are supported' };
   }
 
-  const hostname = parsedUrl.hostname.toLowerCase();
+  // 2. Normalize hostname: lower-case & strip trailing root dots (FQDNs)
+  const normalizedHost = parsedUrl.hostname.toLowerCase().replace(/\.+$/, '');
+  if (!normalizedHost) {
+    return { safe: false, error: 'Empty hostname' };
+  }
 
-  // Block reserved hostnames and TLDs
-  const blockedHostnames = ['localhost'];
-  const blockedTlds = ['.local', '.internal', '.lan', '.localhost'];
-  if (blockedHostnames.includes(hostname) || blockedTlds.some(tld => hostname.endsWith(tld))) {
+  // 3. Strip IPv6 brackets for inspection: [::1] -> ::1
+  const rawHost = normalizedHost.replace(/^\[|\]$/g, '');
+
+  // 4. Block reserved hostnames and TLDs (apex and subdomains)
+  if (BLOCKED_HOSTNAMES.has(normalizedHost)) {
     return { safe: false, error: 'Access to private or local network hosts is prohibited' };
   }
 
-  // If hostname is a literal IP, validate directly
-  if (isIP(hostname)) {
-    if (isPrivateIP(hostname)) {
+  for (const tld of BLOCKED_TLDS) {
+    const apex = tld.slice(1);
+    if (normalizedHost === apex || normalizedHost.endsWith(tld)) {
+      return { safe: false, error: 'Access to private or reserved TLDs is prohibited' };
+    }
+  }
+
+  // 5. Prohibit single-label internal hostnames (e.g. http://metadata, http://redis)
+  const ipVersion = isIP(rawHost);
+  if (ipVersion === 0 && !normalizedHost.includes('.')) {
+    return { safe: false, error: 'Single-label internal hostnames are prohibited' };
+  }
+
+  // 6. If hostname is a literal IP, validate private IP first
+  if (ipVersion !== 0) {
+    if (isPrivateIP(rawHost)) {
       return { safe: false, error: 'Access to private or reserved IP addresses is prohibited' };
     }
+  }
+
+  // 7. Strict port whitelist (empty = default 80/443)
+  if (parsedUrl.port !== '' && !['80', '443'].includes(parsedUrl.port)) {
+    return { safe: false, error: 'Non-standard destination ports are prohibited' };
+  }
+
+  // If public literal IP with valid port, allowed
+  if (ipVersion !== 0) {
     return { safe: true };
   }
 
-  // For domains, resolve DNS and check ALL resolved IPs to prevent DNS rebinding
+  // 8. For domains, resolve DNS and check ALL resolved IPs to prevent DNS rebinding
   try {
-    const resolved = await dns.lookup(hostname, { all: true, family: 0 });
+    const resolved = await dns.lookup(normalizedHost, { all: true, family: 0 });
     if (resolved.length === 0) {
       return { safe: false, error: 'Hostname could not be resolved' };
     }
