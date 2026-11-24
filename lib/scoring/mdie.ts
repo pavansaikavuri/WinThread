@@ -58,9 +58,16 @@ export function calculateMDIE(
   // 2. TIER 2: Multi-Dimensional Scoring
   // Intent Score (0-100)
   let intentScore = 20;
-  if (/(switch from|leaving|alternative to)/i.test(fullText)) intentScore = 100;
-  else if (/(looking for agency|hire|need agency|recommend agency)/i.test(fullText)) intentScore = 95;
-  else if (hasStrongIntentVerb) intentScore = 80;
+  if (/(switch from|leaving|alternative to)/i.test(fullText)) {
+    intentScore = 100;
+  } else if (
+    matchedSignals.length > 0 ||
+    /(looking for(\s+\w+)*\s+agency|hire|need(\s+\w+)*\s+agency|recommend(\s+\w+)*\s+agency)/i.test(fullText)
+  ) {
+    intentScore = 95;
+  } else if (hasStrongIntentVerb) {
+    intentScore = 80;
+  }
 
   // Pain Match Score (0-100)
   const matchedPains = icp.painPoints.filter(p => fullText.includes(p.toLowerCase()));
@@ -71,8 +78,9 @@ export function calculateMDIE(
   }
 
   // Authority Score (0-100)
-  const matchedTitles = icp.buyerTitles.filter(t => fullText.includes(t.toLowerCase()));
-  const hasAuthorityPhrase = /(our company|my team|we have budget|our budget|client calls)/i.test(fullText);
+  const authorAndText = `${post.author} ${fullText}`.toLowerCase();
+  const matchedTitles = icp.buyerTitles.filter(t => authorAndText.includes(t.toLowerCase()));
+  const hasAuthorityPhrase = /(our company|my team|we have budget|our budget|client calls|our saas|our b2b)/i.test(fullText);
   let authorityScore = 0;
   if (matchedTitles.length > 0) authorityScore = 100;
   else if (hasAuthorityPhrase) authorityScore = 80;
