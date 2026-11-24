@@ -92,7 +92,7 @@ export function ThreadCard({ thread, onApprove, onDismiss, onGenerateQuote }: Th
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => onDismiss(thread.id, 'wrong_persona')}
+                onClick={() => onDismiss(thread.id, 'wrong_person')}
                 className="text-[11px] px-2 py-1 rounded bg-rose-50 text-rose-700 hover:bg-rose-100"
               >
                 Wrong Fit

@@ -1,25 +1,23 @@
 'use server';
 
 import { SetupFormData, setupFormSchema } from '@/lib/validations/setup';
-import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { createServerClient } from '@/lib/supabase/server';
 
-export async function completeSetupWizard(data: SetupFormData, authUserId?: string) {
+export async function completeSetupWizard(data: SetupFormData) {
   const parsed = setupFormSchema.safeParse(data);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0].message };
   }
 
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceRoleKey) {
-    return { success: false, error: 'Server configuration error: SUPABASE_SERVICE_ROLE_KEY is required' };
+  const supabase = await createServerClient();
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { success: false, error: 'Authentication required to create workspace' };
   }
 
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey
-  );
-
-  return executeSetupTransaction(supabaseAdmin, parsed.data, authUserId || 'unauthenticated-lead');
+  return executeSetupTransaction(supabase, parsed.data, user.id);
 }
 
 export async function executeSetupTransaction(
@@ -35,10 +33,9 @@ export async function executeSetupTransaction(
     .eq('domain', domain)
     .maybeSingle();
 
-  // Domain collision: if workspace exists and current user doesn't own it (or is unauthenticated), reject
+  // Domain collision: if workspace exists and current user doesn't own it, reject
   if (existingWs) {
-    const isAuthenticated = userId !== 'unauthenticated-lead';
-    if (!isAuthenticated || existingWs.owner_id !== userId) {
+    if (existingWs.owner_id !== userId) {
       return { success: false, error: `A workspace for ${domain} already exists. Please sign in to access your existing account.` };
     }
   }
@@ -46,7 +43,6 @@ export async function executeSetupTransaction(
   let workspaceId = existingWs?.id;
 
   if (!workspaceId) {
-    const isAuthenticated = userId !== 'unauthenticated-lead';
     const { data: workspace, error: wsError } = await supabase
       .from('workspaces')
       .insert({
@@ -55,8 +51,8 @@ export async function executeSetupTransaction(
         currency: 'USD',
         timezone: 'UTC',
         plan: 'beta',
-        status: isAuthenticated ? 'active' : 'pending_claim',
-        owner_id: isAuthenticated ? userId : null,
+        status: 'active',
+        owner_id: userId,
       })
       .select('id')
       .single();

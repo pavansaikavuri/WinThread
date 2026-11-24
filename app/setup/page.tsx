@@ -10,10 +10,10 @@ export default function SetupPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSetupSubmit = async (data: SetupFormData, userId?: string) => {
+  const handleSetupSubmit = async (data: SetupFormData) => {
     setIsSubmitting(true);
     try {
-      const result = await completeSetupWizard(data, userId);
+      const result = await completeSetupWizard(data);
       if (result.success) {
         router.push('/threads');
       } else {
