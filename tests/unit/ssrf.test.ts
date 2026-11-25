@@ -179,7 +179,7 @@ describe('validateSafeUrl', () => {
     const r1 = await validateSafeUrl('http://8.8.8.8:80');
     expect(r1.safe).toBe(true);
 
-    const r2 = await validateSafeUrl('https://google.com:443');
+    const r2 = await validateSafeUrl('https://1.1.1.1:443');
     expect(r2.safe).toBe(true);
   });
 

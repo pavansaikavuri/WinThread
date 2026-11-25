@@ -10,6 +10,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
 
+env:
+  NEXT_TELEMETRY_DISABLED: 1
+  NEXT_PUBLIC_SUPABASE_URL: https://mock-ci.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-ci-anon-key
+  SUPABASE_SERVICE_ROLE_KEY: mock-ci-service-role-key
+
 jobs:
   verify:
     name: Lint, Typecheck, Test & Build
@@ -23,7 +29,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install Dependencies
@@ -41,12 +47,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run Tests
-        run: npm test
+        run: npm test -- --reporter=verbose
 
       - name: Build Next.js Application
         run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
-          NEXT_PUBLIC_SUPABASE_URL: https://mock-ci.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-ci-anon-key
-          SUPABASE_SERVICE_ROLE_KEY: mock-ci-service-role-key
