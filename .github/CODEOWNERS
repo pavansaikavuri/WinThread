@@ -1,0 +1,11 @@
+# Global repository ownership
+* @pavansaikavuri
+
+# Security & Data Isolation
+/lib/scraper/ssrf.ts @pavansaikavuri
+/supabase/ @pavansaikavuri
+/docs/DATABASE.md @pavansaikavuri
+
+# CI/CD and GitHub Actions
+/.github/ @pavansaikavuri
+/.gitignore @pavansaikavuri

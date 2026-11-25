@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDEs and local editors
+.vscode/
+.idea/
+
+# AI agent local configurations and scratch files
+.claude/
+scan_denials.js
+review_findings.json
+
+# Local environment files
+*.local
+
