@@ -27,7 +27,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Cache Next.js Build
         uses: actions/cache@v4
@@ -47,3 +47,6 @@ jobs:
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: 1
+          NEXT_PUBLIC_SUPABASE_URL: https://mock-ci.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-ci-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: mock-ci-service-role-key
