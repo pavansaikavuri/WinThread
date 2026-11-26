@@ -37,6 +37,32 @@ Before answering architectural questions, designing features, or implementing ch
 - `docs/PLAYBOOK.md`: The 8-Stage Engineering Pipeline, models, and cockpit controls.
 - `docs/features/`: Feature specifications (`01-setup-wizard.md`, `02-signal-feed.md`, etc.).
 - `docs/PRD.md` & `docs/DATABASE.md`: Core requirements and Supabase schema contracts.
+- `docs/research/`: Competitive reverse-engineering & deep architectural research.
+
+## 3. The Option X Invariant & Anti-Blindspot Rules (Automated Defense Harness)
+To prevent statistical regression to the mean (2015-era CRUD mediocrity) and the 6 AI blind spots:
+
+### Rule 1: Banned Legacy Defaults (The Option X Mandate)
+- **NO Manual Drag-and-Drop Kanban** where event-triggered automated state transitions are possible.
+- **NO Single-Tier Flat Pricing** where 3-tier psychological anchoring (Core / Recommended / Retainer) applies.
+- **NO Password-Walled Portals** for client quote approvals. Always use cryptographic, tokenized micro-portals (BLAKE3 signature + expiration).
+- **NO Manual Tax Inputs.** Statutory compliance (GST Luhn-mod-36 checksum, CGST/SGST/IGST split, Indian LUT export disclaimers) must be deterministically calculated in code.
+- **NO Dead-End Loss Logging.** Loss attribution must be split (Lead Fit vs. Execution) with auto-generated downsell resuscitation triggers.
+
+### Rule 2: The Reality Grounding Invariant (Anti-Mock Law)
+- Passing mocked tests (`vi.mock`) is **necessary but never sufficient**.
+- An implementation is NOT complete until:
+  1. `npx tsc --noEmit` compiles with 0 errors.
+  2. `npm test` passes all unit and integration suites without mock drift.
+  3. `npm run build` succeeds with Turbopack.
+  4. Live routes are verified via HTTP inspection (`curl -I`) and browser rendering without SSR crashes (`ERROR 108BS75701`).
+
+### Rule 3: Adversarial Gatekeeping (Separation of Powers)
+- Never allow builder agents to grade their own architecture.
+- All non-trivial plans must undergo adversarial review (`egm-design` / `doubt-driven-development`) to expose hidden failure modes, edge cases, and sycophantic assumptions before code is written.
+
+### Rule 4: Externalized Memory Invariant
+- Any solved bug, architectural decision, or statutory formula must be recorded as an atomic concept note in `C:\Users\kavur\Brain\wiki/` and validated with `wiki-lint.js` to survive context truncation across sessions.
 
 
 <!-- BEGIN:nextjs-agent-feedback -->
