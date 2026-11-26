@@ -10,6 +10,16 @@ export interface RawSignalPayload {
   published_at: string;
 }
 
+function stripHtml(input: string): string {
+  let previous = '';
+  let current = input;
+  while (current !== previous) {
+    previous = current;
+    current = current.replace(/<[^>]*>/g, '');
+  }
+  return current;
+}
+
 export async function fetchHackerNewsSignals(query: string, limit = 20): Promise<RawSignalPayload[]> {
   try {
     const url = `https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(query)}&tags=(story,comment)&hitsPerPage=${limit}`;
@@ -24,7 +34,7 @@ export async function fetchHackerNewsSignals(query: string, limit = 20): Promise
         source: 'hackernews' as SupportedChannel,
         external_id,
         title: hit.story_title || text.slice(0, 80),
-        content: text.replace(/<[^>]*>/g, ''), // strip basic HTML tags from HN comments
+        content: stripHtml(text), // safely strip HTML tags from HN comments
         author: hit.author || 'anonymous',
         thread_url: `https://news.ycombinator.com/item?id=${rawId.replace(/^hn-/, '')}`,
         published_at: hit.created_at_i ? new Date(hit.created_at_i * 1000).toISOString() : new Date().toISOString(),

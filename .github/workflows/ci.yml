@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
 
+permissions:
+  contents: read
+
 env:
   NEXT_TELEMETRY_DISABLED: 1
   NEXT_PUBLIC_SUPABASE_URL: https://mock-ci.supabase.co

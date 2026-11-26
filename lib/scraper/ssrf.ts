@@ -110,8 +110,13 @@ const BLOCKED_TLDS = [
  */
 export async function validateSafeUrl(rawUrl: string): Promise<{ safe: boolean; error?: string }> {
   // Pre-check: Scoped IPv6 with zone indices (% or %25) are strictly prohibited
-  if (/\[[^\]]*(?:%|%25)[^\]]*\]/i.test(rawUrl)) {
-    return { safe: false, error: 'Scoped IPv6 addresses with zone indices are prohibited' };
+  const bracketStart = rawUrl.indexOf('[');
+  const bracketEnd = rawUrl.indexOf(']');
+  if (bracketStart !== -1 && bracketEnd > bracketStart) {
+    const insideBrackets = rawUrl.slice(bracketStart + 1, bracketEnd);
+    if (insideBrackets.includes('%')) {
+      return { safe: false, error: 'Scoped IPv6 addresses with zone indices are prohibited' };
+    }
   }
 
   let parsedUrl: URL;
